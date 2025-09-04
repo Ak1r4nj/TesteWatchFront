@@ -8,21 +8,40 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loggedUser, setLoggedUser] = useState<any>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api.createUser({ name, email, password });
-    router.push("/users");
+    setError("");
+    try {
+      const body = await api.createUser({ name, email, password });
+
+      if (body.message) {
+        setError(body?.message || "Erro ao criar usuário");
+        return;
+      }
+
+      localStorage.setItem("user", JSON.stringify(body));
+      setLoggedUser(body);
+      console.log("✅ Usuário criado:", body);
+      router.push("/users");
+    } catch (err) {
+      console.error("Failed to create user", err);
+      setError(String(err));
+      return;
+    }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow p-6 rounded w-96 space-y-4"
+        className="bg-customPrimaryLight shadow p-6 rounded w-96 space-y-4"
       >
-        <h1 className="text-xl font-bold">Cadastro</h1>
+        <h1 className="text-customPrimaryDark font-bold">Cadastro</h1>
+        {error && <p className="text-red-500 text-sm">{error}</p>}
         <input
           className="w-full border p-2 rounded"
           placeholder="Nome"
