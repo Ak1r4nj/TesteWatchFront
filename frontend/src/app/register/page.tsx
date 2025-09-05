@@ -26,7 +26,7 @@ export default function RegisterPage() {
       localStorage.setItem("user", JSON.stringify(body));
       setLoggedUser(body);
       console.log("✅ Usuário criado:", body);
-      router.push("/users");
+      router.push("/");
     } catch (err) {
       console.error("Failed to create user", err);
       setError(String(err));

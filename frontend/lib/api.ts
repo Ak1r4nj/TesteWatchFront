@@ -37,4 +37,22 @@ export const api = {
     });
     return res.json();
   },
+
+  getActivities: async () => fetchJson("/activities", "GET"),
+  getActivityById: async (id: string) => fetchJson(`/activities/${id}`, "GET"),
+  createActivity: async (data: any) => fetchJson("/activities", "POST", data),
+  updateActivity: async (id: string, data: any) =>
+    fetchJson(`/activities/${id}`, "PUT", data),
+  deleteActivity: async (id: string) =>
+    fetchJson(`/activities/${id}`, "DELETE"),
 };
+
+async function fetchJson(path: string, method: string, body?: any) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) throw new Error((await res.json()).message || "Erro na API");
+  return res.json();
+}
