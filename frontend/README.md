@@ -1,8 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+**Sobre o Projeto**
 
-## Getting Started
+Este projeto foi desenvolvido como parte do Desafio Técnico Fullstack Júnior da Watch Brasil.
+O objetivo foi criar uma aplicação de gerenciamento de usuários (CRUD completo) utilizando:
 
-First, run the development server:
+**Tecnologias Utilizadas**
+Framework: Next.js (com App Router)
+
+Biblioteca UI: React
+
+Estilização: Tailwind CSS
+
+Linguagem: TypeScript
+
+Gerenciamento de Estado: Hooks do React (useState, useEffect)
+
+Roteamento: next/navigation
+---
+**Pré requisitos:**
+
+Você vai precisar ter o Node.js (versão 18.x ou superior) e um gerenciador de pacotes como npm, Yarn ou pnpm instalados.
+rode o servidor backend com o comando 
+```bash 
+npx sls offline
+```
+
+---
+
+**Instale as dependências**:
+```bash
+
+npm install
+# ou
+yarn install
+# ou
+pnpm install
+```
+
+---
+
+
+**Rode o projeto**:
 
 ```bash
 npm run dev
@@ -14,23 +51,8 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Acesse em:**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[http://localhost:3000](http://localhost:3000)

@@ -1,80 +1,135 @@
 "use client";
 
+import ActivityCard from "./components/ActivityCard";
 import { useEffect, useState } from "react";
-import { api } from "../../lib/api";
 import { useRouter } from "next/navigation";
+import { api } from "../../lib/api";
 
-export default function UsersPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loggedUser, setLoggedUser] = useState<any>(null);
+export default function DashboardPage() {
+  const [activities, setActivities] = useState<any[]>([]);
+  const [filter, setFilter] = useState<"mine" | "all">("mine");
+  const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-
   useEffect(() => {
-  const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setLoggedUser(JSON.parse(savedUser));
-    }
-  }, []);
+    const userJson = localStorage.getItem("user");
 
-  if (loggedUser) {
+    if (!userJson || !JSON.parse(userJson).id) {
+      router.push("/login");
+      return;
+    }
+
+    const storedUser = JSON.parse(userJson);
+    setUser(storedUser);
+
+    const savedFilter = localStorage.getItem("activityFilter");
+    if (savedFilter === "all" || savedFilter === "mine") {
+      setFilter(savedFilter);
+    }
+
+    async function fetchActivities() {
+      try {
+        const res = await api.getActivities();
+        setActivities(res);
+      } catch (err) {
+        console.error("Erro ao carregar atividades:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchActivities();
+  }, [router]);
+
+  if (isLoading) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Bem-vindo, {loggedUser.name}!</h1>
-        <p>Você está logado com o e-mail: {loggedUser.email}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Verificando autenticação...</p>
       </div>
     );
   }
 
-  return (
-    <div className="p-6 max-w-md mx-auto mt-20 bg-customPrimaryDark shadow-lg rounded-lg">
-      <h1 className="text-2xl font-bold mb-6">Login</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          try {
-            const body = await api.loginUser(email, password);
+  const handleFilterChange = (newFilter: "mine" | "all") => {
+    setFilter(newFilter);
+    localStorage.setItem("activityFilter", newFilter);
+  };
 
-            if (body.message) {
-              setError(body.message ?? "Erro ao fazer login");
-            } else {
-              const user = body;
-              localStorage.setItem("user", JSON.stringify(user));
-              setLoggedUser(user);
-              router.push("/users");
-            }
-          } catch (err: any) {
-            setError(err.message);
-          }
-        }}
-        className="space-y-4"
+  const filteredActivities =
+    filter === "mine" && user
+      ? activities.filter((a) => a.user_ids.includes(user.id))
+      : activities;
+
+  const groupedActivities = {
+    waiting: filteredActivities.filter((a) => a.progress === 0),
+    inProgress: filteredActivities.filter(
+      (a) => a.progress > 0 && a.progress < 100
+    ),
+    done: filteredActivities.filter((a) => a.progress === 100),
+  };
+
+  return (
+    <div className="min-h-screen p-6 bg-customPrimaryDark">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        
+        <div className="flex items-center space-x-4">
+          <div>
+            <button
+              onClick={() => handleFilterChange("mine")}
+              className={`px-3 py-1 rounded-l ${
+                filter === "mine" ? "bg-customPrimaryDark text-white" : "bg-gray-900"
+              }`}
+            >
+              Minhas Tarefas
+            </button>
+            <button
+              onClick={() => handleFilterChange("all")}
+              className={`px-3 py-1 rounded-r ${
+                filter === "all" ? "bg-customPrimaryDark text-white" : "bg-gray-900"
+              }`}
+            >
+              Todas
+            </button>
+          </div>
+
+          <button
+            onClick={() => router.push("/profile")}
+            className="px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-800"
+          >
+            Perfil
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 divide-x divide-gray-300">
+        <div className="px-4">
+          <h2 className="text-lg font-semibold mb-2">Em Espera</h2>
+          {groupedActivities.waiting.map((a) => (
+            <ActivityCard key={a.id} activity={a} />
+          ))}
+        </div>
+
+        <div className="px-4">
+          <h2 className="text-lg font-semibold mb-2">Em Andamento</h2>
+          {groupedActivities.inProgress.map((a) => (
+            <ActivityCard key={a.id} activity={a} />
+          ))}
+        </div>
+        <div className="px-4">
+          <h2 className="text-lg font-semibold mb-2">Concluído</h2>
+          {groupedActivities.done.map((a) => (
+            <ActivityCard key={a.id} activity={a} />
+          ))}
+        </div>
+      </div>
+
+      <button
+        onClick={() => router.push("/activities/new")}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-500 text-white text-3xl flex items-center justify-center shadow-lg hover:bg-blue-600"
       >
-        <input
-          type="email"
-          placeholder="E-mail"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 border rounded"
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded transition"
-        >
-          Entrar
-        </button>
-      </form>
+        +
+      </button>
     </div>
   );
 }
